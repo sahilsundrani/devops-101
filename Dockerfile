@@ -15,4 +15,7 @@ COPY . .
 
 EXPOSE 3000
 
+ENV NODE_ENV=development
+
+# CMD ["npx", "nodemon", "index.js"]
 CMD ["npm", "start"]

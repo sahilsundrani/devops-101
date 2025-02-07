@@ -3,11 +3,20 @@ IMAGE_NAME=basix
 TAG=latest
 PLATFORMS=linux/amd64,linux/arm64/v8
 
-run:
-	docker run -it -p 3000:3000 -v ${PWD}:/app basix 
-
-# to build and push for multi-archtype
+# --- DOCKER ---
 doc-build:
+	docker build -t basix .
+
+# this is to run in development mode
+doc-run-dev:
+	docker run -it --rm --network mynetwork -p 3000:3000 -v ${PWD}:/app basix 
+
+# this is for testing the final build (For Cloud too)
+doc-run:
+	docker run -d -p 3000:3000 $(USER)/$(IMAGE_NAME)
+	
+# to build and push for multi-archtype
+doc-build-multi:
 	docker buildx use mybuilder
 	docker buildx build --platform $(PLATFORMS) -t $(USER)/$(IMAGE_NAME):$(TAG) . --push
 
@@ -24,12 +33,44 @@ doc-pull:
 doc-clean:
 	docker rmi $(IMAGE_NAME):$(TAG)
 
+# --- GIT ---
 git-push:
 	@git commit -m "$${msg:-Auto-commit}"
 	@git push origin main
 
 git-reset:
 	git reset --hard
+
+# --- MONGODB ---
+MONGO_CONTAINER_NAME=mongodb
+MONGO_PORT=27017
+MONGO_USER=admin
+MONGO_PASS=password
+MONGO_DB=mydatabase
+MONGO_VOLUME=mongodb_data
+
+# Run MongoDB container
+run-mongo:
+	docker run -d --name $(MONGO_CONTAINER_NAME) \
+		--network mynetwork \
+		-p $(MONGO_PORT):27017 \
+		-e MONGO_INITDB_ROOT_USERNAME=$(MONGO_USER) \
+		-e MONGO_INITDB_ROOT_PASSWORD=$(MONGO_PASS) \
+		-e MONGO_INITDB_DATABASE=$(MONGO_DB) \
+		-v $(MONGO_VOLUME):/data/db \
+		mongo
+
+# Stop and remove the container
+stop-mongo:
+	docker stop $(MONGO_CONTAINER_NAME) && docker rm $(MONGO_CONTAINER_NAME)
+
+# Show logs
+logs-mongo:
+	docker logs -f $(MONGO_CONTAINER_NAME)
+
+# Remove MongoDB volume (⚠ This will delete all data)
+clean-mongo:
+	docker volume rm $(MONGO_VOLUME)
 
 help:
 	@echo "Available commands:"
