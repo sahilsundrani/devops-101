@@ -13,7 +13,15 @@ doc-run-dev:
 
 # this is for testing the final build (For Cloud too)
 doc-run:
-	docker run -d -p 3000:3000 $(USER)/$(IMAGE_NAME)
+	docker run -d \
+		--network mynetwork \
+		-p 3000:3000 \
+		-e MONGO_USER=admin \
+		-e MONGO_PASS=password \
+		-e MONGO_DB=mydatabase \
+		-e MONGO_HOST=mongodb \
+		-e MONGO_PORT=27017 \
+		$(USER)/$(IMAGE_NAME)
 	
 # to build and push for multi-archtype
 doc-build-multi:
