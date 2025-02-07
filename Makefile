@@ -22,8 +22,8 @@ doc-clean:
 	docker rmi $(IMAGE_NAME):$(TAG)
 
 git-push:
-	git commit -m "${msg ? "Auto-commit" : "$(msg)"}"
-	git push origin main
+	@git commit -m "$${msg:-Auto-commit}"
+	@git push origin main
 
 git-reset:
 	git reset --hard
