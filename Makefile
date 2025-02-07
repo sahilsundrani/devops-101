@@ -3,6 +3,9 @@ IMAGE_NAME=basix
 TAG=latest
 PLATFORMS=linux/amd64,linux/arm64/v8
 
+run:
+	docker run -it -p 3000:3000 -v ${PWD}:/app basix 
+
 # to build and push for multi-archtype
 doc-build:
 	docker buildx use mybuilder
